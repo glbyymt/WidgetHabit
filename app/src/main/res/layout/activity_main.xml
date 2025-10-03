@@ -10,8 +10,17 @@
         android:id="@+id/habitsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/addHabitButton"
         android:padding="8dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/habit_item" />
+
+    <Button
+        android:id="@+id/addHabitButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:text="新しい習慣を追加" />
 
 </RelativeLayout>

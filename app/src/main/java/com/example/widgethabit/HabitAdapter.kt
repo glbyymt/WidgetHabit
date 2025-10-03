@@ -29,14 +29,12 @@ class HabitAdapter(private val habits: List<Habit>) : RecyclerView.Adapter<Habit
 
         // 各行がクリックされたときの処理を、ここで定義する
         holder.itemView.setOnClickListener {
-            // 1. 遷移先の画面(Activity)を指定して、Intent(手紙)を作成
             val context = holder.itemView.context
-            val intent = Intent(context, HabitDetailActivity::class.java)
-
-            // 2. 手紙に「どの習慣がタップされたか」という情報（今回はタイトル）を入れる
-            intent.putExtra("HABIT_TITLE", habit.title)
-
-            // 3. 画面遷移を開始（手紙をポストに投函）
+            val intent = Intent(context, HabitDetailActivity::class.java).apply {
+                // ★ IDとタイトルの両方を渡す
+                putExtra("HABIT_ID", habit.id)
+                putExtra("HABIT_TITLE", habit.title)
+            }
             context.startActivity(intent)
         }
     }
