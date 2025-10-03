@@ -51,7 +51,8 @@ internal fun updateAppWidget(
 ) {
     // ウィジェットのレイアウト(見た目)を取得
     val views = RemoteViews(context.packageName, R.layout.habit_widget_provider)
-    // ↓↓↓ ここでエラーが出ていないことに注目！
+
+    // サンプル
     views.setTextViewText(R.id.habit_title, "筋トレ")
     views.setTextViewText(R.id.habit_status, "未達成")
 

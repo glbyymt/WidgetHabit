@@ -11,6 +11,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.WidgetHabit">
+        <activity
+            android:name=".HabitDetailActivity"
+            android:exported="false" />
+
         <receiver
             android:name=".HabitWidgetProvider"
             android:exported="false">

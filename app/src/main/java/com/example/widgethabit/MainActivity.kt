@@ -19,7 +19,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // 1. 表示するダミーデータを作成
-        val habitList = listOf("筋トレ", "勉強", "水を飲む", "散歩する", "読書")
+        val habitList = listOf(
+            Habit(title = "筋トレ", isCompleted = false, excuse = null),
+            Habit(title = "勉強", isCompleted = false, excuse = null),
+            Habit(title = "水を飲む", isCompleted = false, excuse = null),
+            Habit(title = "散歩する", isCompleted = false, excuse = null),
+            Habit(title = "読書", isCompleted = false, excuse = null)
+        )
 
         // 2. アダプターを作成して、RecyclerViewにセットする
         val adapter = HabitAdapter(habitList)
