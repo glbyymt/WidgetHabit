@@ -8,6 +8,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import android.view.LayoutInflater
+import androidx.appcompat.app.AlertDialog
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,11 +32,25 @@ class MainActivity : AppCompatActivity() {
 
         // 新しい習慣を追加するボタンの処理（サンプル）
         binding.addHabitButton.setOnClickListener {
-            CoroutineScope(Dispatchers.IO).launch {
-                val newHabit = Habit(title = "新しい習慣 ${System.currentTimeMillis() % 100}", isCompleted = false, excuse = null)
-                habitDao.insertHabit(newHabit)
-                loadHabits() // リストを再読み込み
-            }
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_habit, null)
+            val editText = dialogView.findViewById<android.widget.EditText>(R.id.editTextHabitTitle)
+
+            AlertDialog.Builder(this)
+                .setTitle("新しい習慣を追加")
+                .setView(dialogView)
+                .setPositiveButton("追加") { dialog, _ ->
+                    val title = editText.text.toString()
+                    if (title.isNotBlank()) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            val newHabit = Habit(title = title, isCompleted = false, excuse = null)
+                            habitDao.insertHabit(newHabit)
+                            loadHabits() // リストを再読み込み
+                        }
+                    }
+                    dialog.dismiss()
+                }
+                .setNegativeButton("キャンセル", null)
+                .show()
         }
     }
 
