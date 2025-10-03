@@ -6,17 +6,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.widgethabit.databinding.HabitItemBinding
 
-class HabitAdapter(private val habits: List<Habit>) : RecyclerView.Adapter<HabitAdapter.HabitViewHolder>() {
+class HabitAdapter(
+    private val habits: List<Habit>,
+    private val onHabitLongClicked: (Habit) -> Unit
+) : RecyclerView.Adapter<HabitAdapter.HabitViewHolder>() {
 
-    // ViewHolderにクリック処理を追加！
-    class HabitViewHolder(val binding: HabitItemBinding) : RecyclerView.ViewHolder(binding.root) {
-        // ViewHolderが作成された瞬間に、クリックリスナーを設定する
-        init {
-            itemView.setOnClickListener {
-                // ここではクリックされたことだけを検知。具体的な処理はonBindViewHolderで行う
-            }
-        }
-    }
+    class HabitViewHolder(val binding: HabitItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HabitViewHolder {
         val binding = HabitItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -27,7 +22,6 @@ class HabitAdapter(private val habits: List<Habit>) : RecyclerView.Adapter<Habit
         val habit = habits[position]
         holder.binding.habitTitleTextView.text = habit.title
 
-        // 達成状態に応じて見た目を変更（取り消し線と文字色）
         if (habit.isCompleted) {
             holder.binding.habitTitleTextView.paintFlags = holder.binding.habitTitleTextView.paintFlags or android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
             holder.binding.habitTitleTextView.setTextColor(android.graphics.Color.GRAY)
@@ -40,11 +34,16 @@ class HabitAdapter(private val habits: List<Habit>) : RecyclerView.Adapter<Habit
             val context = holder.itemView.context
             val intent = Intent(context, HabitDetailActivity::class.java).apply {
                 putExtra("HABIT_ID", habit.id)
-                // isCompletedも詳細画面に渡すようにする
                 putExtra("HABIT_IS_COMPLETED", habit.isCompleted)
                 putExtra("HABIT_TITLE", habit.title)
             }
             context.startActivity(intent)
+        }
+
+        // 長押しされたときの処理
+        holder.itemView.setOnLongClickListener {
+            onHabitLongClicked(habit)
+            true // trueを返すと、イベントがここで完了したことを示す
         }
     }
 

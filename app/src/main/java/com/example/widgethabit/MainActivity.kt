@@ -1,15 +1,15 @@
 package com.example.widgethabit
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.LayoutInflater
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.widgethabit.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import android.view.LayoutInflater
-import androidx.appcompat.app.AlertDialog
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,14 +23,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // データベースのインスタンスを取得
         database = AppDatabase.getInstance(this)
         habitDao = database.habitDao()
 
-        // RecyclerViewのセットアップ
         binding.habitsRecyclerView.layoutManager = LinearLayoutManager(this)
 
-        // 新しい習慣を追加するボタンの処理（サンプル）
         binding.addHabitButton.setOnClickListener {
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_habit, null)
             val editText = dialogView.findViewById<android.widget.EditText>(R.id.editTextHabitTitle)
@@ -44,7 +41,7 @@ class MainActivity : AppCompatActivity() {
                         CoroutineScope(Dispatchers.IO).launch {
                             val newHabit = Habit(title = title, isCompleted = false, excuse = null)
                             habitDao.insertHabit(newHabit)
-                            loadHabits() // リストを再読み込み
+                            loadHabits()
                         }
                     }
                     dialog.dismiss()
@@ -56,19 +53,34 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // 画面が表示されるたびに、データベースから最新の習慣リストを読み込む
         loadHabits()
     }
 
     private fun loadHabits() {
-        // Coroutineを使ってバックグラウンドでデータベースからデータを取得
         CoroutineScope(Dispatchers.IO).launch {
             val habitList = habitDao.getAllHabits()
-            // UIの更新はメインスレッドで行う
             withContext(Dispatchers.Main) {
-                adapter = HabitAdapter(habitList)
+                // Adapterに、長押しされた習慣を削除するための処理を渡す
+                adapter = HabitAdapter(habitList) { habitToDelete ->
+                    showDeleteConfirmationDialog(habitToDelete)
+                }
                 binding.habitsRecyclerView.adapter = adapter
             }
         }
+    }
+
+    // 削除を確認するダイアログを表示し、OKならDBから削除する関数
+    private fun showDeleteConfirmationDialog(habit: Habit) {
+        AlertDialog.Builder(this)
+            .setTitle("習慣の削除")
+            .setMessage("「${habit.title}」を本当に削除しますか？")
+            .setPositiveButton("削除") { _, _ ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    habitDao.deleteHabit(habit)
+                    loadHabits() // リストを再読み込みして画面に反映
+                }
+            }
+            .setNegativeButton("キャンセル", null)
+            .show()
     }
 }
