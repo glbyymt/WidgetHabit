@@ -21,8 +21,8 @@ class HabitDetailActivity : AppCompatActivity() {
 
         habitDao = AppDatabase.getInstance(this).habitDao()
 
-        // IntentからIDとタイトルを受け取る
         val habitId = intent.getIntExtra("HABIT_ID", -1)
+        val habitIsCompleted = intent.getBooleanExtra("HABIT_IS_COMPLETED", false)
         val habitTitle = intent.getStringExtra("HABIT_TITLE")
         binding.habitDetailTitle.text = habitTitle
 
@@ -32,13 +32,22 @@ class HabitDetailActivity : AppCompatActivity() {
             return
         }
 
+        // 達成状態に応じてボタンのテキストを変更
+        if (habitIsCompleted) {
+            binding.completeButton.text = "未達成に戻す"
+        } else {
+            binding.completeButton.text = "達成！"
+        }
+
         binding.completeButton.setOnClickListener {
+            // 現在の状態を反転させた新しい状態を作る
+            val newIsCompleted = !habitIsCompleted
             CoroutineScope(Dispatchers.IO).launch {
-                // ★★★ id = habitId を追加 ★★★
-                val habit = Habit(id = habitId, title = habitTitle ?: "", isCompleted = true, excuse = null)
+                val habit = Habit(id = habitId, title = habitTitle ?: "", isCompleted = newIsCompleted, excuse = null)
                 habitDao.updateHabit(habit)
             }
-            Toast.makeText(this, "$habitTitle を達成しました！", Toast.LENGTH_SHORT).show()
+            val message = if (newIsCompleted) "達成しました！" else "未達成に戻しました"
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
             finish()
         }
 

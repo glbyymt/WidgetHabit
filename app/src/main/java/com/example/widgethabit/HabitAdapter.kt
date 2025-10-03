@@ -27,12 +27,21 @@ class HabitAdapter(private val habits: List<Habit>) : RecyclerView.Adapter<Habit
         val habit = habits[position]
         holder.binding.habitTitleTextView.text = habit.title
 
-        // 各行がクリックされたときの処理を、ここで定義する
+        // 達成状態に応じて見た目を変更（取り消し線と文字色）
+        if (habit.isCompleted) {
+            holder.binding.habitTitleTextView.paintFlags = holder.binding.habitTitleTextView.paintFlags or android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
+            holder.binding.habitTitleTextView.setTextColor(android.graphics.Color.GRAY)
+        } else {
+            holder.binding.habitTitleTextView.paintFlags = holder.binding.habitTitleTextView.paintFlags and android.graphics.Paint.STRIKE_THRU_TEXT_FLAG.inv()
+            holder.binding.habitTitleTextView.setTextColor(android.graphics.Color.BLACK)
+        }
+
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, HabitDetailActivity::class.java).apply {
-                // ★ IDとタイトルの両方を渡す
                 putExtra("HABIT_ID", habit.id)
+                // isCompletedも詳細画面に渡すようにする
+                putExtra("HABIT_IS_COMPLETED", habit.isCompleted)
                 putExtra("HABIT_TITLE", habit.title)
             }
             context.startActivity(intent)
